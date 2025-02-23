@@ -1,2 +1,5 @@
 streamlit
 fdb
+pandas
+plotly
+xlsxwriter
