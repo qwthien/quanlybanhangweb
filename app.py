@@ -1,77 +1,82 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-import io
-from database import get_products
+from database import get_san_pham, get_loai_san_pham, get_nha_cung_cap, get_khach_hang, get_nhan_vien, get_hoa_don, get_phieu_nhap
 
 # Cấu hình trang
-st.set_page_config(page_title="Quản lý Kho Hàng", layout="wide")
+st.set_page_config(page_title="Quản lý Bán Hàng", layout="wide")
 
 # Sidebar - Thanh điều hướng
 with st.sidebar:
     st.image("https://www.svgrepo.com/show/354197/warehouse.svg", width=100)
-    st.title("📦 Quản lý Kho Hàng")
-    page = st.radio("Chọn chức năng", ["🏠 Trang chính", "📊 Báo cáo", "📂 Xuất dữ liệu"])
-
-# Lấy dữ liệu từ cơ sở dữ liệu
-products = get_products()
+    st.title("📦 Quản lý Bán Hàng")
+    page = st.radio("Chọn chức năng", [
+        "🏠 Trang chính",
+        "📦 Quản lý Sản phẩm",
+        "🏭 Quản lý Nhà Cung Cấp",
+        "👥 Quản lý Khách Hàng",
+        "👨‍💼 Quản lý Nhân Viên",
+        "🧾 Quản lý Hóa Đơn",
+        "📥 Quản lý Phiếu Nhập"
+    ])
 
 # Trang chính
 if page == "🏠 Trang chính":
-    st.subheader("📋 Danh sách Sản phẩm")
+    st.subheader("🏠 Trang chính")
+    st.write("Chào mừng bạn đến với hệ thống quản lý bán hàng!")
 
+# Quản lý Sản phẩm
+elif page == "📦 Quản lý Sản phẩm":
+    st.subheader("📦 Quản lý Sản phẩm")
+    san_pham = get_san_pham()
+    df_san_pham = pd.DataFrame(san_pham, columns=["ID_SP", "TEN_SP", "ID_LOAI", "ID_NCC", "GIA"])
+    
     # Thanh tìm kiếm
     search_query = st.text_input("🔍 Tìm kiếm sản phẩm", "")
-
-    # Bộ lọc giá & số lượng
+    
+    # Bộ lọc giá
     min_price, max_price = st.slider("💰 Lọc theo giá", min_value=0, max_value=20000000, value=(0, 20000000))
-    min_qty, max_qty = st.slider("📦 Lọc theo số lượng", min_value=0, max_value=100, value=(0, 100))
-
+    
     # Lọc dữ liệu
     filtered_products = [
-        product for product in products
-        if (search_query.lower() in product["Tên"].lower()) and
-           (min_price <= product["Giá bán"] <= max_price) and
-           (min_qty <= product.get("Số lượng", 0) <= max_qty)
+        product for product in san_pham
+        if (search_query.lower() in product[1].lower()) and  # product[1] là tên sản phẩm
+           (min_price <= product[4] <= max_price)           # product[4] là giá sản phẩm
     ]
+    
+    # Hiển thị dữ liệu đã lọc
+    st.dataframe(pd.DataFrame(filtered_products, columns=["ID_SP", "TEN_SP", "ID_LOAI", "ID_NCC", "GIA"]))
 
-    # Hiển thị bảng dữ liệu
-    st.dataframe(filtered_products)
+# Quản lý Nhà Cung Cấp
+elif page == "🏭 Quản lý Nhà Cung Cấp":
+    st.subheader("🏭 Quản lý Nhà Cung Cấp")
+    nha_cung_cap = get_nha_cung_cap()
+    df_nha_cung_cap = pd.DataFrame(nha_cung_cap, columns=["ID_NCC", "TEN_NCC", "SDT_NCC"])
+    st.dataframe(df_nha_cung_cap)
 
-# Báo cáo
-elif page == "📊 Báo cáo":
-    st.subheader("📊 Thống kê hàng tồn kho")
+# Quản lý Khách Hàng
+elif page == "👥 Quản lý Khách Hàng":
+    st.subheader("👥 Quản lý Khách Hàng")
+    khach_hang = get_khach_hang()
+    df_khach_hang = pd.DataFrame(khach_hang, columns=["ID_KH", "TEN_KH", "SDT_KH", "DIA_CHI"])
+    st.dataframe(df_khach_hang)
 
-    # Tạo DataFrame tạm thời để vẽ biểu đồ
-    df_report = pd.DataFrame({
-        "Tên": [product["Tên"] for product in products],
-        "Số lượng": [product.get("Số lượng", 0) for product in products],
-        "Tổng giá trị": [product["Giá bán"] * product.get("Số lượng", 1) for product in products]
-    })
+# Quản lý Nhân Viên
+elif page == "👨‍💼 Quản lý Nhân Viên":
+    st.subheader("👨‍💼 Quản lý Nhân Viên")
+    nhan_vien = get_nhan_vien()
+    df_nhan_vien = pd.DataFrame(nhan_vien, columns=["ID_NV", "TEN_NV", "SDT_NV", "ID_TK"])
+    st.dataframe(df_nhan_vien)
 
-    # Biểu đồ số lượng hàng tồn
-    fig_qty = px.bar(df_report, x="Tên", y="Số lượng", title="📦 Số lượng tồn kho", color="Số lượng")
-    st.plotly_chart(fig_qty, use_container_width=True)
+# Quản lý Hóa Đơn
+elif page == "🧾 Quản lý Hóa Đơn":
+    st.subheader("🧾 Quản lý Hóa Đơn")
+    hoa_don = get_hoa_don()
+    df_hoa_don = pd.DataFrame(hoa_don, columns=["ID_HD", "NGAY_LAP", "ID_NV", "ID_KH", "TONG_TIEN"])
+    st.dataframe(df_hoa_don)
 
-    # Biểu đồ giá trị kho
-    fig_value = px.pie(df_report, names="Tên", values="Tổng giá trị", title="💰 Tổng giá trị kho")
-    st.plotly_chart(fig_value, use_container_width=True)
-
-# Xuất dữ liệu
-elif page == "📂 Xuất dữ liệu":
-    st.subheader("📂 Xuất dữ liệu kho hàng")
-
-    # Chuyển danh sách sản phẩm thành DataFrame
-    df_export = pd.DataFrame(products)
-
-    # Xuất ra CSV
-    csv = df_export.to_csv(index=False).encode('utf-8')
-    st.download_button(label="📥 Tải xuống CSV", data=csv, file_name="danh_sach_san_pham.csv", mime="text/csv")
-
-    # Xuất ra Excel
-    excel_buffer = io.BytesIO()
-    with pd.ExcelWriter(excel_buffer, engine="xlsxwriter") as writer:
-        df_export.to_excel(writer, index=False, sheet_name="KhoHang")
-    excel_buffer.seek(0)
-
-    st.download_button(label="📥 Tải xuống Excel", data=excel_buffer, file_name="danh_sach_san_pham.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+# Quản lý Phiếu Nhập
+elif page == "📥 Quản lý Phiếu Nhập":
+    st.subheader("📥 Quản lý Phiếu Nhập")
+    phieu_nhap = get_phieu_nhap()
+    df_phieu_nhap = pd.DataFrame(phieu_nhap, columns=["ID_PN", "NGAY_NHAP", "ID_NV", "ID_NCC", "TONG_TIEN"])
+    st.dataframe(df_phieu_nhap)
