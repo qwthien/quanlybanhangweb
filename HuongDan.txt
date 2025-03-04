@@ -1,0 +1,12 @@
+Giải thích thứ tự sắp xếp:
+
+TAI_KHOAN: Bảng này không có khóa ngoại, nên được chèn đầu tiên.
+LOAI_SAN_PHAM: Bảng này cũng không có khóa ngoại.
+NHA_CUNG_CAP: Bảng này không có khóa ngoại.
+KHACH_HANG: Bảng này không có khóa ngoại.
+NHAN_VIEN: Bảng này có khóa ngoại tham chiếu đến TAI_KHOAN, nên được chèn sau khi TAI_KHOAN đã có dữ liệu.
+SAN_PHAM: Bảng này có khóa ngoại tham chiếu đến LOAI_SAN_PHAM, nên được chèn sau khi LOAI_SAN_PHAM đã có dữ liệu.
+PHIEU_NHAP: Bảng này có khóa ngoại tham chiếu đến NHAN_VIEN và NHA_CUNG_CAP, nên được chèn sau khi các bảng này đã có dữ liệu.
+HOA_DON: Bảng này có khóa ngoại tham chiếu đến NHAN_VIEN và KHACH_HANG, nên được chèn sau khi các bảng này đã có dữ liệu.
+CHI_TIET_PHIEU_NHAP: Bảng này có khóa ngoại tham chiếu đến PHIEU_NHAP, SAN_PHAM, NHAN_VIEN, và NHA_CUNG_CAP, nên được chèn sau khi các bảng này đã có dữ liệu.
+CHI_TIET_HOA_DON: Bảng này có khóa ngoại tham chiếu đến HOA_DON, SAN_PHAM, và NHAN_VIEN, nên được chèn sau khi các bảng này đã có dữ liệu.
