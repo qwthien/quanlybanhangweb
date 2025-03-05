@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
-from database import get_san_pham, get_loai_san_pham, get_nha_cung_cap, get_khach_hang, get_nhan_vien, get_hoa_don, get_phieu_nhap
+from database import (
+    get_san_pham, get_loai_san_pham, get_nha_cung_cap, get_khach_hang, get_nhan_vien, get_hoa_don, get_phieu_nhap,
+    them_san_pham, xoa_san_pham, sua_san_pham
+)
 
 # Cấu hình trang
 st.set_page_config(page_title="Quản lý Bán Hàng", layout="wide")
@@ -34,7 +37,7 @@ elif page == "📦 Quản lý Sản phẩm":
     search_query = st.text_input("🔍 Tìm kiếm sản phẩm", "")
     
     # Bộ lọc giá
-    min_price, max_price = st.slider("💰 Lọc theo giá", min_value=0, max_value=20000000, value=(0, 20000000))
+    min_price, max_price = st.slider("💰 Lọc theo giá", min_value=0, max_value=500000, value=(0, 500000))
     
     # Lọc dữ liệu
     filtered_products = [
@@ -45,6 +48,40 @@ elif page == "📦 Quản lý Sản phẩm":
     
     # Hiển thị dữ liệu đã lọc
     st.dataframe(pd.DataFrame(filtered_products, columns=["ID_SP", "TEN_SP", "ID_LOAI", "ID_NCC", "GIA"]))
+
+    # Form thêm sản phẩm
+    with st.form("Thêm sản phẩm"):
+        st.write("### Thêm sản phẩm mới")
+        ten_sp = st.text_input("Tên sản phẩm")
+        id_loai = st.number_input("ID Loại sản phẩm", min_value=1)
+        id_ncc = st.number_input("ID Nhà cung cấp", min_value=1)
+        gia = st.number_input("Giá", min_value=0)
+        if st.form_submit_button("Thêm"):
+            them_san_pham(ten_sp, id_loai, id_ncc, gia)
+            st.success("Thêm sản phẩm thành công!")
+            st.experimental_rerun()
+    
+    # Form xóa sản phẩm
+    with st.form("Xóa sản phẩm"):
+        st.write("### Xóa sản phẩm")
+        id_sp_xoa = st.number_input("ID Sản phẩm cần xóa", min_value=1)
+        if st.form_submit_button("Xóa"):
+            xoa_san_pham(id_sp_xoa)
+            st.success("Xóa sản phẩm thành công!")
+            st.experimental_rerun()
+    
+    # Form sửa thông tin sản phẩm
+    with st.form("Sửa sản phẩm"):
+        st.write("### Sửa thông tin sản phẩm")
+        id_sp_sua = st.number_input("ID Sản phẩm cần sửa", min_value=1)
+        ten_sp_moi = st.text_input("Tên sản phẩm mới")
+        id_loai_moi = st.number_input("ID Loại sản phẩm mới", min_value=1)
+        id_ncc_moi = st.number_input("ID Nhà cung cấp mới", min_value=1)
+        gia_moi = st.number_input("Giá mới", min_value=0)
+        if st.form_submit_button("Sửa"):
+            sua_san_pham(id_sp_sua, ten_sp_moi, id_loai_moi, id_ncc_moi, gia_moi)
+            st.success("Sửa thông tin sản phẩm thành công!")
+            st.experimental_rerun()
 
 # Quản lý Nhà Cung Cấp
 elif page == "🏭 Quản lý Nhà Cung Cấp":
